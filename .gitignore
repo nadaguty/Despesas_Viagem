@@ -1,0 +1,70 @@
+# ==========================================
+# Python & Bytecode
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# ==========================================
+# Ambientes Virtuais (Virtual Environments)
+# ==========================================
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# ==========================================
+# Variáveis de Ambiente e Segredos
+# (NUNCA envie senhas ou chaves para o GitHub)
+# ==========================================
+.env
+.env.local
+.env.*.local
+.streamlit/secrets.toml
+
+# ==========================================
+# Banco de Dados Local (SQLite)
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+viagem.db
+
+# ==========================================
+# Arquivos de Exportação / Temporários
+# ==========================================
+*.xlsx
+*.csv
+*.log
+
+# ==========================================
+# IDEs e Editores de Código
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ==========================================
+# Sistema Operacional
+# ==========================================
+.DS_Store
+Thumbs.db
