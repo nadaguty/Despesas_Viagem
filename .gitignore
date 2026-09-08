@@ -36,7 +36,6 @@ ENV/
 # (NUNCA envie senhas ou chaves para o GitHub)
 # ==========================================
 .env
-.env.example
 .env.local
 .env.*.local
 .streamlit/secrets.toml
