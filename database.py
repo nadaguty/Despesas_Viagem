@@ -24,20 +24,40 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
+import streamlit as st
+
 # ---------------------------------------------------------------------------
 # Configuração de conexão
 # ---------------------------------------------------------------------------
-# Por padrão usa SQLite local (arquivo viagem.db, criado automaticamente).
-# Para produção com PostgreSQL/Supabase, defina a variável de ambiente
-# DATABASE_URL, por exemplo:
-#   postgresql+psycopg2://usuario:senha@host:5432/nomedobanco
-# Veja README.md para instruções completas (inclusive .env / secrets do
-# Streamlit Community Cloud).
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///viagem.db")
+def _get_database_url() -> str:
+    """Busca DATABASE_URL no st.secrets do Streamlit ou nas variáveis de ambiente."""
+    try:
+        if "DATABASE_URL" in st.secrets and st.secrets["DATABASE_URL"]:
+            return str(st.secrets["DATABASE_URL"]).strip()
+    except Exception:
+        pass
+    return os.getenv("DATABASE_URL", "sqlite:///viagem.db").strip()
 
-# check_same_thread=False é necessário só para SQLite (Streamlit usa threads)
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
-engine = create_engine(DATABASE_URL, connect_args=connect_args)
+DATABASE_URL = _get_database_url()
+
+# Corrigir protocolo caso o provedor (Heroku/Supabase) forneça 'postgres://' ou 'postgresql://'
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+elif DATABASE_URL.startswith("postgresql://") and not DATABASE_URL.startswith("postgresql+psycopg2://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+
+# Parâmetros de conexão por dialeto
+if DATABASE_URL.startswith("sqlite"):
+    connect_args = {"check_same_thread": False}
+else:
+    # PostgreSQL na nuvem (Supabase, Neon, Render)
+    connect_args = {"connect_timeout": 10}
+
+engine = create_engine(
+    DATABASE_URL,
+    connect_args=connect_args,
+    pool_pre_ping=True,  # Reconecta conexões que caíram por inatividade
+)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 Base = declarative_base()
