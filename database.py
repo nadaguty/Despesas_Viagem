@@ -33,9 +33,12 @@ if not DATABASE_URL:
     try:
         import streamlit as st
         if "DATABASE_URL" in st.secrets:
-            DATABASE_URL = str(st.secrets["DATABASE_URL"]).strip()
+            DATABASE_URL = str(st.secrets["DATABASE_URL"])
     except Exception:
         pass
+
+if DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.strip().strip('"').strip("'")
 
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///viagem.db"
