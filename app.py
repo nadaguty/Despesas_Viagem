@@ -117,6 +117,10 @@ with aba_participantes:
 with aba_despesa:
     st.subheader("Registrar nova despesa")
 
+    if st.session_state.pop("limpar_campos_despesa", False):
+        st.session_state["despesa_desc"] = ""
+        st.session_state["despesa_valor"] = 0.0
+
     if "sucesso_despesa" in st.session_state:
         msg_sucesso = st.session_state.pop("sucesso_despesa")
         st.success(msg_sucesso)
@@ -202,8 +206,7 @@ with aba_despesa:
                 st.session_state["sucesso_despesa"] = (
                     f"✅ Despesa '{descricao.strip()}' no valor de R$ {valor_total:,.2f} salva com sucesso!"
                 )
-                st.session_state["despesa_desc"] = ""
-                st.session_state["despesa_valor"] = 0.0
+                st.session_state["limpar_campos_despesa"] = True
                 st.rerun()
 
 # ===========================================================================
