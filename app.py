@@ -116,6 +116,12 @@ with aba_participantes:
 # ===========================================================================
 with aba_despesa:
     st.subheader("Registrar nova despesa")
+
+    if "sucesso_despesa" in st.session_state:
+        msg_sucesso = st.session_state.pop("sucesso_despesa")
+        st.success(msg_sucesso)
+        st.toast(msg_sucesso, icon="🎉")
+
     participantes = db.listar_participantes()
 
     if len(participantes) < 2:
@@ -126,10 +132,20 @@ with aba_despesa:
         col1, col2 = st.columns(2)
         with col1:
             data_gasto = st.date_input("Data do gasto", value=date.today())
-            descricao = st.text_input("Descrição da despesa", placeholder="Ex.: Jantar no restaurante X")
+            descricao = st.text_input(
+                "Descrição da despesa",
+                placeholder="Ex.: Jantar no restaurante X",
+                key="despesa_desc",
+            )
         with col2:
             categoria = st.selectbox("Categoria", CATEGORIAS)
-            valor_total = st.number_input("Valor total (R$)", min_value=0.0, step=0.01, format="%.2f")
+            valor_total = st.number_input(
+                "Valor total (R$)",
+                min_value=0.0,
+                step=0.01,
+                format="%.2f",
+                key="despesa_valor",
+            )
 
         pagador_nome = st.selectbox("Quem pagou?", list(nomes_map.keys()))
 
@@ -183,7 +199,11 @@ with aba_despesa:
                     tipo_divisao=tipo_salvo,
                     rateios=rateios_input,
                 )
-                st.success("Despesa registrada com sucesso!")
+                st.session_state["sucesso_despesa"] = (
+                    f"✅ Despesa '{descricao.strip()}' no valor de R$ {valor_total:,.2f} salva com sucesso!"
+                )
+                st.session_state["despesa_desc"] = ""
+                st.session_state["despesa_valor"] = 0.0
                 st.rerun()
 
 # ===========================================================================
