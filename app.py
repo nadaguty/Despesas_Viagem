@@ -322,14 +322,14 @@ with aba_liquidacao:
     else:
         nomes_map = {p.nome: p.id for p in participantes}
 
-        with st.form("form_liquidacao", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                pagador_nome = st.selectbox("Quem pagou", list(nomes_map.keys()), key="liq_pagador")
-            with col2:
-                opcoes_recebedor = [n for n in nomes_map if n != pagador_nome]
-                recebedor_nome = st.selectbox("Quem recebeu", opcoes_recebedor, key="liq_recebedor")
+        col1, col2 = st.columns(2)
+        with col1:
+            pagador_nome = st.selectbox("Quem pagou (Pagador)", list(nomes_map.keys()), key="liq_pagador")
+        with col2:
+            opcoes_recebedor = [n for n in nomes_map if n != pagador_nome]
+            recebedor_nome = st.selectbox("Quem recebeu (Recebedor)", opcoes_recebedor, key="liq_recebedor")
 
+        with st.form("form_liquidacao", clear_on_submit=True):
             valor_liq = st.number_input("Valor pago (R$)", min_value=0.0, step=0.01, format="%.2f")
             data_liq = st.date_input("Data do pagamento", value=date.today(), key="liq_data")
             obs = st.text_input("Observação (opcional)", placeholder="Ex.: Pix transferido dia X")
