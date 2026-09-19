@@ -273,12 +273,36 @@ with aba_painel:
 
         st.divider()
         st.markdown("#### 🔄 Acerto de contas — quem deve pagar quem")
-        st.caption(
-            "Algoritmo de compensação mínima de dívidas (Minimum Cash Flow): "
-            "gera o menor número possível de transações para zerar todos os saldos."
+
+        modo_acerto = st.radio(
+            "Selecione a lógica de acerto de contas:",
+            options=[
+                "⚡ Otimizado / Simplificado (Menor número de transferências)",
+                "📜 Direto por Despesa (Quem pagou cada gasto recebe direto)",
+            ],
+            index=0,
+            key="modo_acerto_select",
+            help="Alterne entre o modo que reduz a quantidade de Pixs e o modo direto despesa por despesa."
         )
 
-        transacoes = calc.simplificar_dividas(df_balancos)
+        with st.expander("💡 Entenda a diferença entre os 2 modos de acerto de contas"):
+            st.markdown("""
+            **⚡ 1. Modo Otimizado / Simplificado (Recomendado):**
+            * **Como funciona:** Consolida todas as contas da viagem e ajusta os saldos finais de cada pessoa.
+            * **Vantagem:** Elimina a **triangulação de dinheiro** (quando a pessoa A paga a B para a B repassar a C).
+            * **Exemplo:** Se o Pandolf deve R$ 300 para o Vitor, mas o Vitor deve R$ 300 para o Gustavo, o Pandolf faz o Pix de R$ 300 direto para o Gustavo. O número de transações é o **mínimo possível**, e no final **todos recebem/pagam os mesmos valores exatos**!
+
+            ---
+
+            **📜 2. Modo Direto por Despesa:**
+            * **Como funciona:** Calcula a dívida direta considerando **exclusivamente quem colocou a mão no bolso para pagar cada gasto individual**.
+            * **Ideal para:** Quando os participantes preferem acertar diretamente com quem fez os pagamentos das despesas específicas em que participaram, sem compensação cruzada entre outros gastos.
+            """)
+
+        if modo_acerto.startswith("⚡"):
+            transacoes = calc.simplificar_dividas(df_balancos)
+        else:
+            transacoes = calc.calcular_dividas_diretas(participantes, despesas, liquidacoes)
 
         if not transacoes:
             st.success("✅ Todas as contas já estão quitadas! Ninguém deve nada a ninguém.")

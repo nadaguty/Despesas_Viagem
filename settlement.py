@@ -163,3 +163,63 @@ def simplificar_dividas(df_balancos, tolerancia=TOLERANCIA):
             j += 1
 
     return transacoes
+
+
+def calcular_dividas_diretas(participantes, despesas, liquidacoes, tolerancia=TOLERANCIA):
+    """
+    Calcula as dívidas diretas par-a-par entre os participantes, sem a simplificação
+    multilateral de compensação de dívidas.
+
+    Para cada par de pessoas (A, B):
+    - Acumula quanto B consumiu de despesas que A pagou.
+    - Abate pagamentos de liquidação já realizados.
+    - Faz a compensação bilateral líquida direta entre A e B.
+
+    Returns:
+        list[dict]: [{'de': str, 'para': str, 'valor': float}, ...]
+    """
+    matriz = defaultdict(lambda: defaultdict(float))
+    nome_map = {p.id: p.nome for p in participantes}
+
+    # 1. Mapeia despesas: consumidor deve ao pagador
+    for d in despesas:
+        pagador_id = d.pagador_id
+        for r in d.rateios:
+            consumidor_id = r.participante_id
+            if consumidor_id != pagador_id:
+                matriz[consumidor_id][pagador_id] += r.valor_consumido
+
+    # 2. Mapeia liquidações já efetuadas: liq.pagador pagou liq.recebedor
+    for l in liquidacoes:
+        matriz[l.pagador_id][l.recebedor_id] += l.valor
+
+    # 3. Consolidação bilateral entre todos os pares
+    transacoes = []
+    p_ids = list(nome_map.keys())
+
+    for i in range(len(p_ids)):
+        for j in range(i + 1, len(p_ids)):
+            id1 = p_ids[i]
+            id2 = p_ids[j]
+
+            divida_1_para_2 = matriz[id1][id2]
+            divida_2_para_1 = matriz[id2][id1]
+
+            saldo_net = round(divida_1_para_2 - divida_2_para_1, 2)
+
+            if saldo_net > tolerancia:
+                transacoes.append({
+                    "de": nome_map[id1],
+                    "para": nome_map[id2],
+                    "valor": saldo_net,
+                })
+            elif saldo_net < -tolerancia:
+                transacoes.append({
+                    "de": nome_map[id2],
+                    "para": nome_map[id1],
+                    "valor": round(-saldo_net, 2),
+                })
+
+    # Ordena por valor decrescente
+    transacoes.sort(key=lambda x: x["valor"], reverse=True)
+    return transacoes
