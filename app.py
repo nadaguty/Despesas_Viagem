@@ -23,6 +23,8 @@ import streamlit as st
 
 import database as db
 import settlement as calc
+import importlib
+importlib.reload(calc)
 
 CATEGORIAS = ["Hospedagem", "Alimentação", "Transporte", "Lazer", "Outros"]
 
@@ -299,7 +301,7 @@ with aba_painel:
             * **Ideal para:** Quando os participantes preferem acertar diretamente com quem fez os pagamentos das despesas específicas em que participaram, sem compensação cruzada entre outros gastos.
             """)
 
-        if modo_acerto.startswith("⚡"):
+        if modo_acerto.startswith("⚡") or not hasattr(calc, "calcular_dividas_diretas"):
             transacoes = calc.simplificar_dividas(df_balancos)
         else:
             transacoes = calc.calcular_dividas_diretas(participantes, despesas, liquidacoes)
