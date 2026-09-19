@@ -191,7 +191,7 @@ def calcular_dividas_diretas(participantes, despesas, liquidacoes, tolerancia=TO
 
     # 2. Mapeia liquidações já efetuadas: liq.pagador pagou liq.recebedor
     for l in liquidacoes:
-        matriz[l.pagador_id][l.recebedor_id] += l.valor
+        matriz[l.pagador_id][l.recebedor_id] -= l.valor
 
     # 3. Consolidação bilateral entre todos os pares
     transacoes = []
