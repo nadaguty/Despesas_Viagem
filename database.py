@@ -43,9 +43,11 @@ if DATABASE_URL:
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///viagem.db"
 
-# Suporte para URLs do tipo postgres:// (padrão antigo do Heroku/Supabase)
+# Suporte para URLs do tipo postgres:// ou postgresql:// (garante o driver psycopg2)
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "+" not in DATABASE_URL.split("://")[0]:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
